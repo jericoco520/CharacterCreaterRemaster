@@ -1,5 +1,5 @@
 package com.example.charactercreator
-import android.graphics.drawable.PaintDrawable
+
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -19,18 +19,17 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.charactercreator.com.example.charactercreator.Character
-import com.example.charactercreator.com.example.charactercreator.rememberCharacterState
 import com.example.charactercreator.com.example.charactercreator.statList
-import com.example.charactercreator.com.example.charactercreator.updateStat
 import com.example.charactercreator.ui.theme.CharacterCreatorTheme
 
 class MainActivity : ComponentActivity() {
@@ -52,18 +51,37 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun CharacterCreatorApp(
     modifier: Modifier = Modifier,
+    viewModel: CharacterViewModel = viewModel()
 ) {
-    // Use characterState to update the values in the character
-    val characterState = rememberCharacterState()
-    // Use character to access the values, but changing them here will not update the state!
-    val character = characterState.value
-    // User for calculating how many points are left
-    val remainingPoints = character.maxPoints - character.totalPoints
+    val uiState by viewModel.uiState.collectAsState()
+
+    // Pass the uiState to the CharacterScreen along with the lambdas
+    CharacterScreen(
+        uiState = uiState,
+        onNameChange = viewModel::onNameChange,
+        onClassChange = viewModel::onClassChange,
+        onDescriptionChange = viewModel::onDescriptionChange,
+        onStatUpdate = viewModel::updateStat,
+        modifier = modifier
+    )
+}
+
+@Composable
+fun CharacterScreen(
+    uiState: CharacterCreatorUiState,
+    onNameChange: (String) -> Unit,
+    onClassChange: (String) -> Unit,
+    onDescriptionChange: (String) -> Unit,
+    onStatUpdate: (String, Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val character = uiState.character
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween,
-        modifier = modifier.padding(16.dp)
+        modifier = modifier
+            .padding(16.dp)
             .fillMaxSize()
     ) {
         Text(
@@ -73,23 +91,28 @@ fun CharacterCreatorApp(
         // Display inputtable character info
         CharacterInfoInput(
             character = character,
-            onNameChange = { newName -> characterState.value = character.copy(name = newName) },
-            onClassChange = { newClass -> characterState.value = character.copy(charClass = newClass) },
-            onDescriptionChange = { newDescription ->
-                characterState.value = character.copy(description = newDescription)
-            }
+            onNameChange = onNameChange,
+            onClassChange = onClassChange,
+            onDescriptionChange = onDescriptionChange
         )
 
         // Display the allocatable stats
-        StatGrid(characterState = characterState)
+        StatGrid(
+            character = character,
+            onStatUpdate = onStatUpdate
+        )
 
         // Display the remaining points
-        PointsDisplay(pointsRemaining = remainingPoints, maxPoints = character.maxPoints)
+        PointsDisplay(
+            pointsRemaining = uiState.remainingPoints,
+            maxPoints = character.maxPoints
+        )
 
         // Display summary of derived stats
-        SummaryDisplay(character = character)
+        SummaryDisplay(attributes = uiState.attributes)
     }
 }
+
 
 /*
  * CharacterInfoInput Composable
@@ -135,8 +158,11 @@ fun CharacterInfoInput(
  * Create a grid of StatControl composables.
  */
 @Composable
-fun StatGrid(characterState: MutableState<Character>, modifier: Modifier = Modifier) {
-    val character = characterState.value
+fun StatGrid(
+    character: Character,
+    onStatUpdate: (String, Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val pointsUsed = character.totalPoints
     val maxPoints = character.maxPoints
 
@@ -155,8 +181,8 @@ fun StatGrid(characterState: MutableState<Character>, modifier: Modifier = Modif
             StatControl(
                 statName = statInfo.name,
                 statValue = statValue,
-                onIncrement = { updateStat(characterState, statInfo.name, 1, maxPoints) },
-                onDecrement = { updateStat(characterState, statInfo.name, -1, maxPoints) },
+                onIncrement = { onStatUpdate(statInfo.name, 1) },
+                onDecrement = { onStatUpdate(statInfo.name, -1) },
                 isIncrementEnabled = pointsUsed < maxPoints,
                 isDecrementEnabled = statValue > 0
             )
@@ -227,13 +253,13 @@ fun PointsDisplay(
  */
 @Composable
 fun SummaryDisplay(
-    character: Character,
+    attributes: Map<String, Int>,
     modifier: Modifier = Modifier
 ) {
     // Get the derived stat values from the character
-    val attack = character.attribMap.getOrDefault("Attack", 0)
-    val defense = character.attribMap.getOrDefault("Defense", 0)
-    val cost = character.attribMap.getOrDefault("Cost", 0)
+    val attack = attributes.getOrDefault("Attack", 0)
+    val defense = attributes.getOrDefault("Defense", 0)
+    val cost = attributes.getOrDefault("Cost", 0)
 
     Column (
         modifier = modifier.padding(vertical = 8.dp),
@@ -246,15 +272,16 @@ fun SummaryDisplay(
     }
 }
 
-// TODO: AttributeList Composable
-//  Needs: map of stats: values
-// Optional: Modifier
-
 @Preview(showBackground = true)
 @Composable
 fun CharacterCreatorPreview() {
     CharacterCreatorTheme {
-        CharacterCreatorApp(
+        CharacterScreen(
+            uiState = CharacterCreatorUiState(),
+            onNameChange = {},
+            onClassChange = {},
+            onDescriptionChange = {},
+            onStatUpdate = { _, _ -> },
             modifier = Modifier
                 .fillMaxSize()
                 .wrapContentSize()
