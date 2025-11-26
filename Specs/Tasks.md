@@ -3,26 +3,26 @@
 This document outlines the step-by-step tasks required to complete Project 3, focusing on migrating to MVVM architecture and adding character selection features.
 
 ## Phase 1: Setup & Dependencies
-- [ ] **Add Dependencies**
+- [x] **Add Dependencies**
     - Open `app/build.gradle.kts`.
     - Add `implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.9.4")` (or latest compatible version) to the `dependencies` block.
     - Sync Gradle project.
 
 ## Phase 2: Data Layer & State Definition
-- [ ] **Review/Create Data Models**
+- [x] **Review/Create Data Models**
     - Ensure `Character.kt` exists and is an immutable `data class` (Name, Class, Description, Stats).
     - Ensure `DataSource.kt` exists and contains `defaultCharacters` list.
-- [ ] **Create UI State**
+- [x] **Create UI State**
     - Create a new file `CharacterCreatorUiState.kt`.
     - Define a `data class CharacterCreatorUiState`.
     - Add a property to hold the current `Character`.
     - (Optional) Add other UI-specific state flags if necessary (e.g., `isDropdownExpanded` - though often this is local UI state).
 
 ## Phase 3: ViewModel Implementation
-- [ ] **Create ViewModel Class**
+- [x] **Create ViewModel Class**
     - Create `CharacterCreatorViewModel.kt`.
     - Extend `ViewModel`.
-- [ ] **Define StateFlow**
+- [x] **Define StateFlow**
     - Create private `_uiState` as `MutableStateFlow<CharacterCreatorUiState>`.
     - Create public `uiState` as `StateFlow<CharacterCreatorUiState>` using `asStateFlow()`.
     - Initialize with a default character.
