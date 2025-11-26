@@ -1,7 +1,5 @@
 package com.example.charactercreator
 
-import com.example.charactercreator.com.example.charactercreator.Character
-
 /**
  * Represents the state of the Character Creator UI.
  *

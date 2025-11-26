@@ -4,10 +4,9 @@
  * This file contains the Character class definition, as well some other data such as
  * what Icon is associated with each stat/attribute, stored in statList and attribList.
  */
-package com.example.charactercreator.com.example.charactercreator
+package com.example.charactercreator
 
 import androidx.annotation.DrawableRes
-import com.example.charactercreator.R
 
 // this little class is just to group the stat/attribute names with their icon and a short
 // description
@@ -101,4 +100,29 @@ data class Character(
             )
         }
     }
+}
+
+// Helper function to make a Character more easily
+fun makeCharacter(
+    name: String = "",
+    charClass: String = "",
+    description: String = "",
+    power: Int = 0,
+    endurance: Int = 0,
+    speed: Int = 0,
+    focus: Int = 0
+): Character {
+    val statsMap = mapOf(
+        "Power" to power,
+        "Endurance" to endurance,
+        "Speed" to speed,
+        "Focus" to focus
+    )
+
+    return Character(
+        name = name,
+        charClass = charClass,
+        description = description,
+        statMap = statsMap,
+    )
 }

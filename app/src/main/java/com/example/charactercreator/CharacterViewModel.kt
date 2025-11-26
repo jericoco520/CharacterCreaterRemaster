@@ -1,7 +1,6 @@
 package com.example.charactercreator
 
 import androidx.lifecycle.ViewModel
-import com.example.charactercreator.com.example.charactercreator.Character
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

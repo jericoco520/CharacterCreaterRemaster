@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -28,9 +27,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.charactercreator.com.example.charactercreator.Character
-import com.example.charactercreator.com.example.charactercreator.statList
 import com.example.charactercreator.ui.theme.CharacterCreatorTheme
+import com.example.charactercreator.data.DataSource.defaultCharacters
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -137,11 +135,12 @@ fun CharacterInfoInput(
             label = { Text("Name") },
             modifier = Modifier.fillMaxWidth()
         )
-        TextField(
-            value = character.charClass,
-            onValueChange = onClassChange,
-            label = { Text("Class") },
-            modifier = Modifier.fillMaxWidth()
+        CharacterSelectionDropdown(
+            characters = defaultCharacters,
+            selectedCharacter = character,
+            onCharacterSelected = {
+                onClassChange(it.charClass)
+            }
         )
         TextField(
             value = character.description,
@@ -275,16 +274,5 @@ fun SummaryDisplay(
 @Preview(showBackground = true)
 @Composable
 fun CharacterCreatorPreview() {
-    CharacterCreatorTheme {
-        CharacterScreen(
-            uiState = CharacterCreatorUiState(),
-            onNameChange = {},
-            onClassChange = {},
-            onDescriptionChange = {},
-            onStatUpdate = { _, _ -> },
-            modifier = Modifier
-                .fillMaxSize()
-                .wrapContentSize()
-        )
-    }
+    CharacterCreatorApp()
 }
